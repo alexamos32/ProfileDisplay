@@ -1,4 +1,5 @@
 var Profile = require("./profile.js");
+var render = require("./render.js");
 
 //Handling HTTP route GET / and POST /
 function home(request, response) {
@@ -6,9 +7,10 @@ function home(request, response) {
     if (request.url === "/") {          
         //display the search form
         response.writeHead(200, {'Content-Type' : 'text/plain'});
-        response.write("Header\n");
-        response.write("Search\n");
-        response.end('Footer\n');      
+        render.view("header", {}, response);
+        render.view("search", {}, response);
+        render.view("footer", {}, response);     
+        response.end(); 
     }
     //if POST &  url =="/"
     //redirect to /:username
@@ -21,19 +23,41 @@ function user(request, response) {
     var username = request.url.replace("/", "");
     if(username.length > 0) {
         response.writeHead(200, {'Content-Type': 'text/plain'});  
-        response.write("Header\n");
+        render.view("header", {}, response);
 
         //get the Json from Treehouse website
         var studentProfile = new Profile(username);
 
-        studentProfile.on("end", function (profileJson) {
+        studentProfile.on("end", function (profileJSON) {
             var values = {
                 avatarURL: profileJSON.gravatar_url,
                 username: profileJSON.profile_name,
-                badges: profileJSON.length,
-                javascriptPoints: profileJson.points.javaScript
+                badges: profileJSON.badges.length,
+                javascriptPoints: profileJSON.points.javaScript
 
             }
-        })
+            render.view("profile", values, response);
+            render.view("footer", {}, response);
+            response.end();
+
+
+        });
+        // If an error occurs
+        studentProfile.on("error", function(error){
+            //show the error
+            render.view("error", {errorMessage: error.message}, response);
+            render.view("search", {}, response);
+            render.view("footer", {}, response);
+            response.end();
+
+        
+
+        });
+
     }
 }
+
+
+module.exports.home = home;
+module.exports.user = user;
+
