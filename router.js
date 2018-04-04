@@ -1,12 +1,14 @@
 var Profile = require("./profile.js");
 var render = require("./render.js");
 
+var commonHeader = {'Content-Type': 'text/html'};
+
 //Handling HTTP route GET / and POST /
 function home(request, response) {
     //check for GET & if URL == "/" i.e checking for root page
     if (request.url === "/") {          
         //display the search form
-        response.writeHead(200, {'Content-Type' : 'text/plain'});
+        response.writeHead(200, commonHeader);
         render.view("header", {}, response);
         render.view("search", {}, response);
         render.view("footer", {}, response);     
@@ -22,7 +24,7 @@ function user(request, response) {
     //Check url = /.... 
     var username = request.url.replace("/", "");
     if(username.length > 0) {
-        response.writeHead(200, {'Content-Type': 'text/plain'});  
+        response.writeHead(200, commonHeader);  
         render.view("header", {}, response);
 
         //get the Json from Treehouse website
@@ -33,7 +35,7 @@ function user(request, response) {
                 avatarURL: profileJSON.gravatar_url,
                 username: profileJSON.profile_name,
                 badges: profileJSON.badges.length,
-                javascriptPoints: profileJSON.points.javaScript
+                javascriptPoints: profileJSON.points.JavaScript
 
             }
             render.view("profile", values, response);
@@ -49,6 +51,7 @@ function user(request, response) {
             render.view("search", {}, response);
             render.view("footer", {}, response);
             response.end();
+        
 
         
 
